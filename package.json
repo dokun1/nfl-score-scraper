@@ -1,9 +1,9 @@
 {
-	"name" : "node-web-scrape",
-	"version" : "0.0.1",
-	"description" : "Scrape le web",
+	"name" : "nfl-score-scraper",
+	"version" : "0.1.0",
+	"description" : "Get live score information via nfl.com",
 	"main" : "server.js",
-	"author" : "Scotch",
+	"author" : "David Okun",
 	"dependencies" : {
 		"express" : "latest",
 		"request" : "latest",
