@@ -8,5 +8,7 @@
 		"express" : "latest",
 		"request" : "latest",
 		"cheerio" : "latest"
-	}
+	},
+	"repository" : "https://github.com/dokun1/nfl-score-scraper",
+	"license" : "MIT"
 }
