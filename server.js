@@ -19,6 +19,7 @@ app.get('/schedule/:year/:week', function(req, res) {
 		res.send({"error" : "Invalid week"});
 		return;
 	}
+	console.log("Request for week " + week + " from year " + year + ".");
 	url = 'http://www.nfl.com/schedules/' + year + '/REG' + week;
 	request(url, function(error, response, html) {
 		if (!error) {

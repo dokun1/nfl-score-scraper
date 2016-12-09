@@ -15,6 +15,12 @@ And then, as an example, visit the following URL in your browser, or `GET` the U
 
 - `http://localhost:8081/schedule/2016/1`
 
+## Contribution Guide
+
+- Check the issues list, and feel free to add one if you think this needs something.
+- Be nice, and be cool.
+- Be helpful - I'm a mobile developer learning Node!
+
 ## Roadmap
 
 - Add authentication
