@@ -1,13 +1,14 @@
 {
 	"name" : "nfl-score-scraper",
-	"version" : "0.1.0",
+	"version" : "0.1.1",
 	"description" : "Get live score information via nfl.com",
 	"main" : "server.js",
 	"author" : "David Okun",
 	"dependencies" : {
 		"express" : "latest",
 		"request" : "latest",
-		"cheerio" : "latest"
+		"cheerio" : "latest",
+		"array-unique" : "latest"
 	},
 	"repository" : "https://github.com/dokun1/nfl-score-scraper",
 	"license" : "MIT"
