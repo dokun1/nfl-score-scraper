@@ -11,9 +11,17 @@ To run locally, perform the following steps:
 - `npm install`
 - `node .`
 
-And then, as an example, visit the following URL in your browser, or `GET` the URL in Postman:
+## Usage
+
+For historical score data:
 
 - `http://localhost:8081/schedule/2016/1`
+
+For live, more granular score data:
+
+- `http://localhost:8081/live/2016/1`
+
+*2016* is the year, *1* is the week. 
 
 ## Contribution Guide
 
