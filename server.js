@@ -46,6 +46,39 @@ function validate(week, year) {
 	return null;
 }
 
+function splitRecord(recordString) {
+	var recordArray = recordString.split("-");
+	var returnArray = [];
+	for (var i = 0; i < recordArray.length; i++) {
+		var string = recordArray[i];
+		var stripped = string.replace(/\D/g,'');
+		returnArray.push(parseInt(stripped));
+	}
+	return returnArray;
+}
+
+function splitScores(scores) {
+	var $ = cheerio.load(scores);
+	var scoreMap = {};
+	var max = 4;
+	if (scores.length > 4) {
+		max = scores.length;
+	}
+	for (var i = 0; i < max; i++) {
+
+		var score = 0;
+		if (i < scores.length) {
+			score = $(scores[i]).text();
+		}
+		if (i < 4) {
+			scoreMap['Q' + (i + 1)] = parseInt(score);
+		} else if (i == 4 && !isNaN(parseInt(score))) {
+			console.log(parseInt(score) + " is not null");
+			scoreMap['OT'] = parseInt(score);
+		}
+	}
+	return scoreMap;
+}
 
 /**
  * Method to scrape game data from HTML.
@@ -53,7 +86,7 @@ function validate(week, year) {
  * @param  {html} HTML that is scraped from the NFL.com url
  * @return {Array} array of game data that is easy to parse
  */
-function scrapeGameList(html) {
+function scrapeHistoryList(html) {
 	var $ = cheerio.load(html);
 	var gameList = $('div[class="list-matchup-row-center"]');
 	var games = [];
@@ -85,6 +118,52 @@ function scrapeGameList(html) {
 	return removeDuplicates(games);
 }
 
+function scrapeLiveList(html) {
+	var $ = cheerio.load(html, {
+		normalizeWhitespace: true,
+		xmlMode: true
+	});
+	var gameList = $('div[class="new-score-box"]');
+	var games = [];
+	for (var i = 0; i < gameList.length; i++) {
+		var game = gameList[i];
+		var awayTeamInfo = parseTeamInfo($(game).children().first().children().children().next());
+		var homeTeamInfo = parseTeamInfo($(game).children().next().children().children().next());
+		var gameTime = $(game).children().next().next().children().next().children().first().text();
+		var gameStarted = false;
+		var gameFinished = true;
+		if (awayTeamInfo.hasOwnProperty("finalScore")) {
+			gameStarted = true;
+		}
+		if (gameTime.indexOf("FINAL") === -1) {
+			gameFinished = false;
+		}
+		games.push({"awayTeam": awayTeamInfo, "homeTeam": homeTeamInfo, "gameStarted": gameStarted, "gameFinished": gameFinished});
+	}
+	return games;
+}
+
+function parseTeamInfo(teamInfoData) {
+	var $ = cheerio.load(teamInfoData);
+	var teamInfo = $(teamInfoData).children().children();
+	var teamRecord = $(teamInfo).first().text().replace(/\s/g, "");
+	var recordArray = splitRecord(teamRecord);
+	var teamNameArray = $(teamInfo).first().next();
+
+	let teamName = $(teamNameArray).text().replace(/\s/g, "") ;
+	let wins = recordArray[0];
+	let losses = recordArray[1];
+	let ties = recordArray[2];
+	let finalScore = $(teamInfoData).children().next().html();
+	if (finalScore === '--') {
+		return ({"teamName": teamName, "record" : {"wins": wins, "losses": losses, "ties": ties}});		
+	} else {
+		var totalScore = $(teamInfoData).children().next().children();
+		let organizedScores = splitScores(totalScore);
+		return ({"teamName": teamName, "record" : {"wins": wins, "losses": losses, "ties": ties}, "finalScore": parseInt(finalScore), "scoreByQuarter": organizedScores});
+	}
+}
+
 /**
  * GET route that allows entry of year and week to get historical year data
  */
@@ -100,15 +179,46 @@ app.get('/schedule/:year/:week', function(req, res) {
 	request(url, function(error, response, html) {
 		if (!error) {
 			console.log(response.statusCode + " GET " + url);
-			var games = scrapeGameList(html);
+			var games = scrapeHistoryList(html);
+			res.statusCode = 200;
+			res.send({"games" : games});
 		} else {
 			res.statusCode = 406;
 			res.send({"error" : error});
 		}
-		res.statusCode = 200;
-		res.send({"games" : games});
+	});
+}),
+
+/**
+ * [description]
+ * @param  {[type]} req  [description]
+ * @param  {[type]} res) {	var        validationError [description]
+ * @return {[type]}      [description]
+ */
+app.get('/live/:year/:week', function(req, res) {
+	var validationError = validate(req.params.week, req.params.year);
+	if (validationError) {
+		res.statusCode = 400;
+		res.send({"error" : validationError});
+		console.log("400 GET " + req.hostname + req.originalUrl);
+		return;
+	}
+	debugger;
+	url = 'http://www.nfl.com/scores/' + req.params.year + '/REG' + req.params.week;
+	request(url, function(error, response, html) {
+		if (!error) {
+			console.log(response.statusCode + " GET " + url);
+			var games = scrapeLiveList(html);
+			res.statusCode = 200;
+			res.send({"games" : games});
+		} else {
+			res.statusCode = 406;
+			res.send({"error" : error});
+		}
 	});
 })
+
+
 
 app.listen('8081')
 
