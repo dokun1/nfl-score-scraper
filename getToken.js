@@ -1,11 +1,8 @@
-var express = require('express');
-var request = require('request');
-var cheerio = require('cheerio');
 var spotifywebapi = require('spotify-web-api-node');
 
 
 var scopes = ['playlist-modify-private', 'playlist-modify-public'],
-    redirectUri = 'https://www.example.com/callback',
+    redirectUri = 'http://localhost/',
     clientId = '33dcfa289c814da6835416045e153409',
     state = 'some-state-of-my-choice';
 
