@@ -1,0 +1,4 @@
+applications:
+- name: nfl-score-scraper
+  random-route: true
+  memory: 128M
