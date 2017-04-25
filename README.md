@@ -6,6 +6,8 @@
 ## About
 This service uses [cheerio.js](http://cheerio.js.org) to scrape the NFL's [website](http://www.nfl.com) for score information. 
 
+This service is also currently deployed to `https://nfl-score-scraper.mybluemix.net`, and can be tested right now without authentication.
+
 To run locally, perform the following steps:
 
 - `npm install`
