@@ -10,6 +10,9 @@
 		"cheerio" : "latest",
 		"array-unique" : "latest"
 	},
+	"engines": {
+        "node": "7.4.0"
+  	},
 	"repository" : "https://github.com/dokun1/nfl-score-scraper",
 	"license" : "MIT"
 }

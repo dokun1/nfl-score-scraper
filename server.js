@@ -220,8 +220,9 @@ app.get('/live/:year/:week', function(req, res) {
 
 
 
-app.listen('8081')
-
-console.log('NFL Score API running on port 8081');
+var port = process.env.PORT || 3000
+app.listen(port, function() {
+    console.log('NFL Score API running on port ' + port);
+});
 
 exports = module.exports = app;
