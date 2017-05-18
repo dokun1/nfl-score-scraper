@@ -187,7 +187,7 @@ app.get('/schedule/:year/:week', function(req, res) {
 			res.send({"error" : error});
 		}
 	});
-}),
+});
 
 /**
  * [description]
@@ -216,33 +216,48 @@ app.get('/live/:year/:week', function(req, res) {
 			res.send({"error" : error});
 		}
 	});
-})
+});
 
 /**
  * GET route for the current week in the season. This route can be used when
- * wanting to know the current season and the current week in the season.
+ * wanting to know the current season and the current week in the season. If the
+ * query parameter "getResults" is true, it will instead return the historical
+ * schedule for the current week.
  */
- app.get('/currentSeasonAndWeek', function(req, res) {
-	 url = 'http://www.nfl.com/schedules';
-	 request(url, function(error, response, html) {
-		 if (!error) {
-			 console.log(response.statusCode + ' GET ' + url);
-			 var path = response.request.uri.path;
-			 var resultStrings = path.split("/");
-			 var year = resultStrings[2];
-			 var week = resultStrings[3];
-			 week = week.slice(3, week.length);
-			 res.statusCode = 200;
-			 res.send({'year': year, 'week': week});
-		 } else {
-			 res.statusCode = 406;
-			 res.send({'error': error});
-		 }
-	 });
- })
+ app.get('/current', function(req, res) {
+	 var getResults = req.query.getResults;
+	 if (!getResults) {
+		 res.statusCode = 400;
+		 res.send({'error': 'Missing query parameter getResults'});
+	 } else {
+		 url = 'http://www.nfl.com/schedules';
+		 request(url, function(error, response, html) {
+			 if (!error) {
+				 console.log(response.statusCode + ' GET ' + url);
+				 console.log(getResults);
+				 if (getResults == 'true') {
+					 var games = scrapeHistoryList(html);
+		 			 res.statusCode = 200;
+		 			 res.send({"games" : games});
+				 } else {
+					 var path = response.request.uri.path;
+					 var resultStrings = path.split("/");
+					 var year = resultStrings[2];
+					 var week = resultStrings[3];
+					 week = week.slice(3, week.length);
+					 res.statusCode = 200;
+					 res.send({'year': year, 'week': week});
+				 }
+			 } else {
+				 res.statusCode = 406;
+				 res.send({'error': error});
+			 }
+		 });
+	 }
+ });
 
 
-var port = process.env.PORT || 3000
+var port = process.env.PORT || 3000;
 app.listen(port, function() {
     console.log('NFL Score API running on port ' + port);
 });
