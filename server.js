@@ -5,7 +5,7 @@ var app = express();
 
 /**
  * Method to remove duplicates based on the teams that are playing from the array of games
- * 
+ *
  * @param  {Array} contains unparsed list of games as sorted by web scraper
  * @return {Array} flattened array of objects depicting games
  */
@@ -82,7 +82,7 @@ function splitScores(scores) {
 
 /**
  * Method to scrape game data from HTML.
- * 
+ *
  * @param  {html} HTML that is scraped from the NFL.com url
  * @return {Array} array of game data that is easy to parse
  */
@@ -113,7 +113,7 @@ function scrapeHistoryList(html) {
 			var homeScore = parseInt(gameDetails[2]);
 			var homeTeam = gameDetails[3];
 			games.push({awayTeam : awayTeam, awayScore : awayScore, homeTeam : homeTeam, homeScore : homeScore, gameFinished : true });
-		}	
+		}
 	}
 	return removeDuplicates(games);
 }
@@ -156,7 +156,7 @@ function parseTeamInfo(teamInfoData) {
 	let ties = recordArray[2];
 	let finalScore = $(teamInfoData).children().next().html();
 	if (finalScore === '--') {
-		return ({"teamName": teamName, "record" : {"wins": wins, "losses": losses, "ties": ties}});		
+		return ({"teamName": teamName, "record" : {"wins": wins, "losses": losses, "ties": ties}});
 	} else {
 		var totalScore = $(teamInfoData).children().next().children();
 		let organizedScores = splitScores(totalScore);
@@ -218,6 +218,28 @@ app.get('/live/:year/:week', function(req, res) {
 	});
 })
 
+/**
+ * GET route for the current week in the season. This route can be used when
+ * wanting to know the current season and the current week in the season.
+ */
+ app.get('/currentSeasonAndWeek', function(req, res) {
+	 url = 'http://www.nfl.com/schedules';
+	 request(url, function(error, response, html) {
+		 if (!error) {
+			 console.log(response.statusCode + ' GET ' + url);
+			 var path = response.request.uri.path;
+			 var resultStrings = path.split("/");
+			 var year = resultStrings[2];
+			 var week = resultStrings[3];
+			 week = week.slice(3, week.length);
+			 res.statusCode = 200;
+			 res.send({'year': year, 'week': week});
+		 } else {
+			 res.statusCode = 406;
+			 res.send({'error': error});
+		 }
+	 });
+ })
 
 
 var port = process.env.PORT || 3000
